@@ -91,6 +91,12 @@ const Login = () => {
           </button>
         </form>
 
+        <div className="mt-3 text-center">
+          <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+            Forgot Password?
+          </Link>
+        </div>
+
         {/* Sign Up - only when no super admin exists */}
         {setupRequired && (
           <div className="mt-4 text-center">

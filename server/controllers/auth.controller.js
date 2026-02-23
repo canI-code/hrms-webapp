@@ -4,6 +4,8 @@ import LoginLog from '../models/LoginLog.js';
 import { generateToken } from '../middleware/auth.js';
 import { createAuditLog } from '../utils/auditHelper.js';
 import { createNotification, notifyByRole } from '../utils/notificationHelper.js';
+import { sendOtpEmail } from '../utils/emailHelper.js';
+import crypto from 'crypto';
 
 // @desc    Check if any super admin exists
 // @route   GET /api/auth/check-setup
@@ -318,6 +320,108 @@ export const toggleUserStatus = async (req, res) => {
     });
 
     res.json({ message: `User ${user.isActive ? 'activated' : 'deactivated'}`, user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Send OTP for password reset
+// @route   POST /api/auth/forgot-password
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Please provide your email address' });
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      // Don't reveal whether account exists — always return success
+      return res.json({ message: 'If an account with this email exists, an OTP has been sent.' });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({ message: 'Your account has been deactivated. Contact the Super Admin.' });
+    }
+
+    // Generate 6-digit OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+    user.resetOtp = otp;
+    user.resetOtpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    await user.save({ validateBeforeSave: false });
+
+    // Send OTP via email
+    await sendOtpEmail(user.email, otp, user.name);
+
+    // Log OTP in dev mode for easy testing
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[DEV] OTP for ${user.email}: ${otp}`);
+    }
+
+    res.json({ message: 'If an account with this email exists, an OTP has been sent.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Failed to send OTP. Please try again later.' });
+  }
+};
+
+// @desc    Verify OTP
+// @route   POST /api/auth/verify-otp
+export const verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required' });
+
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+      resetOtp: otp,
+      resetOtpExpires: { $gt: new Date() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    res.json({ message: 'OTP verified successfully', verified: true });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Reset password after OTP verification
+// @route   POST /api/auth/reset-password
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ message: 'Email, OTP, and new password are required' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+      resetOtp: otp,
+      resetOtpExpires: { $gt: new Date() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired OTP. Please request a new one.' });
+    }
+
+    user.password = newPassword;
+    user.resetOtp = undefined;
+    user.resetOtpExpires = undefined;
+    await user.save();
+
+    await createAuditLog({
+      userId: user._id,
+      action: 'UPDATE',
+      module: 'Auth',
+      description: `Password reset via OTP for ${user.name} (${user.email})`,
+      ipAddress: req.ip
+    });
+
+    res.json({ message: 'Password reset successfully. You can now log in.' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

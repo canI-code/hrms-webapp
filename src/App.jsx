@@ -32,6 +32,7 @@ import Recruitment from './pages/recruitment/Recruitment';
 import Messages from './pages/messages/Messages';
 import ProfileCompletion from './pages/profile/ProfileCompletion';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
   const { user } = useAuth();
@@ -42,6 +43,7 @@ function App() {
       <Routes>
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
         <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/" />} />
+        <Route path="/forgot-password" element={!user ? <ForgotPassword /> : <Navigate to="/" />} />
         <Route path="/complete-profile" element={
           user && !user.profileCompleted ? <ProfileCompletion /> : <Navigate to="/" />
         } />

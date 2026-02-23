@@ -40,6 +40,9 @@ export const registerUserAPI = (data) => API.post('/auth/register', data);
 export const updatePasswordAPI = (data) => API.put('/auth/password', data);
 export const getUsersAPI = (params) => API.get('/auth/users', { params });
 export const toggleUserAPI = (id) => API.put(`/auth/users/${id}/toggle`);
+export const forgotPasswordAPI = (data) => API.post('/auth/forgot-password', data);
+export const verifyOtpAPI = (data) => API.post('/auth/verify-otp', data);
+export const resetPasswordAPI = (data) => API.post('/auth/reset-password', data);
 
 // Notifications
 export const getNotificationsAPI = (params) => API.get('/notifications', { params });

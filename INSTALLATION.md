@@ -66,6 +66,11 @@ CLOUDINARY_API_SECRET=<your-api-secret>
 # Server
 PORT=5000
 NODE_ENV=development
+
+# Email (for Forgot Password OTP)
+EMAIL_SERVICE=gmail
+EMAIL_USER=<your-email@gmail.com>
+EMAIL_PASS=<your-app-password>
 ```
 
 ### How to Get MongoDB URI
@@ -82,6 +87,15 @@ NODE_ENV=development
 1. Go to [Cloudinary](https://cloudinary.com) and create a free account
 2. Go to **Dashboard** — you'll see Cloud Name, API Key, and API Secret right there
 3. Copy them into your `.env` file
+
+### How to Get Gmail App Password (for OTP emails)
+
+1. Go to your [Google Account](https://myaccount.google.com)
+2. Go to **Security** → Enable **2-Step Verification** (required)
+3. After enabling 2FA, go to **Security** → **2-Step Verification** → **App Passwords**
+4. Select app "Mail" and device "Other" → name it "HRMS"
+5. Google will generate a 16-character password — copy it
+6. Set `EMAIL_USER` to your Gmail address and `EMAIL_PASS` to the App Password (not your regular Gmail password)
 
 ## Step 4: Start the Application
 

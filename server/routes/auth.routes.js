@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { login, getMe, register, updatePassword, getUsers, toggleUserStatus, checkSuperAdmin, initialSetup, logout } from '../controllers/auth.controller.js';
+import { login, getMe, register, updatePassword, getUsers, toggleUserStatus, checkSuperAdmin, initialSetup, logout, forgotPassword, verifyOtp, resetPassword } from '../controllers/auth.controller.js';
 import { protect, authorize } from '../middleware/auth.js';
 
 const router = Router();
@@ -7,6 +7,9 @@ const router = Router();
 router.get('/check-setup', checkSuperAdmin);
 router.post('/initial-setup', initialSetup);
 router.post('/login', login);
+router.post('/forgot-password', forgotPassword);
+router.post('/verify-otp', verifyOtp);
+router.post('/reset-password', resetPassword);
 router.post('/logout', protect, logout);
 router.get('/me', protect, getMe);
 router.post('/register', protect, authorize('super_admin', 'hr'), register);

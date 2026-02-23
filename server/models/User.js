@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, default: '' },
   },
   bio: { type: String, default: '', maxlength: 500 },
+
+  // OTP for password reset
+  resetOtp: { type: String },
+  resetOtpExpires: { type: Date },
 }, { timestamps: true });
 
 // Auto-generate systemId before save
