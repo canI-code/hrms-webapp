@@ -52,16 +52,16 @@ Open `.env` and fill in your values:
 
 ```env
 # MongoDB — Get this from MongoDB Atlas → Connect → Drivers
-MONGODB_URI=mongodb+srv://youruser:yourpassword@cluster0.xxxxx.mongodb.net/hrms?retryWrites=true&w=majority
+MONGODB_URI=<your-mongodb-connection-string>
 
 # JWT — Use any random string (the longer the better)
-JWT_SECRET=my-super-secret-key-change-this-to-something-random
+JWT_SECRET=<your-jwt-secret-key>
 JWT_EXPIRE=7d
 
 # Cloudinary — Get these from Cloudinary Dashboard → Settings
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
+CLOUDINARY_CLOUD_NAME=<your-cloud-name>
+CLOUDINARY_API_KEY=<your-api-key>
+CLOUDINARY_API_SECRET=<your-api-secret>
 
 # Server
 PORT=5000
