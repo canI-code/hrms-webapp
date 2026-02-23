@@ -1,0 +1,104 @@
+Perfect     this is where your HRMS becomes professional — clear role-based access 
+control (RBAC). 
+Below is a clean, practical permission breakdown for all four roles. 
+              Super Admin (Company Owner / System Controller) 
+    Can Access 
+Create / Manage HR accounts 
+Create / Manage Managers 
+View all employees 
+Configure company settings 
+Configure payroll rules (tax %, PF %, salary components) 
+Configure leave types & policies 
+View all reports (Payroll, Attendance, Leave, Performance) 
+View audit logs 
+Activate / deactivate users 
+Multi-company management (if you implement) 
+   Cannot (Normally Should Not) 
+Approve daily leave requests 
+Process monthly payroll manually 
+Mark attendance 
+Apply leave as employee 
+    Super Admin = System Control + Monitoring 
+Not daily operations. 
+               HR (Human Resources) 
+    Can Access 
+Add / Edit / Delete employees 
+Assign employees to departments 
+Upload employee documents 
+View all employee profiles 
+Process payroll 
+Generate payslips 
+Edit salary structure 
+View attendance of all employees 
+Approve / Override leave requests 
+Manage leave balance 
+View reports 
+Post announcements 
+Cannot 
+Change system-level configurations (like Super Admin) 
+Create Super Admin account 
+Modify core system permissions (if restricted) 
+HR = Operational Control of Workforce 
+Manager 
+Can Access 
+View their team members only 
+Approve / Reject leave of team 
+View team attendance 
+View team performance reports 
+Recommend salary increment (optional feature) 
+Provide performance ratings 
+View team leave balance 
+Cannot 
+Process payroll 
+Add/Delete employees 
+Edit salary structure 
+Access other department employees 
+Change leave policies 
+    Manager = Team-Level Control Only 
+                Employee 
+    Can Access 
+View own profile 
+Edit limited personal info 
+Apply for leave 
+Cancel leave request (before approval) 
+View leave balance 
+View attendance 
+Download payslip 
+View salary details 
+View announcements 
+   Cannot 
+Approve leave 
+View other employees' salary 
+Edit payroll 
+Access reports 
+Access system settings 
+    Employee = Self-Service Only 
+         Simple Permission Matrix (Clean Table) 
+Feature 
+Super Admin 
+HR 
+Manager 
+Employee 
+Add Employee 
+Delete Employee 
+Approve Leave 
+    (team only)
+Process Payroll 
+View All Reports 
+View Team Reports 
+Apply Leave 
+Download Payslip 
+Configure Policies    
+View Own Profile 
+
+If You Want a More Realistic Workflow 
+Leave Flow: 
+Employee → Manager → HR (final confirmation) 
+Payroll Flow: 
+HR processes → Super Admin views summary 
+Pro Tip for Your Project 
+Implement: 
+Middleware-based permission check 
+Feature-level access (not just page-level) 
+Role-based route protection (Frontend + Backend) 
+That will make your project industry-level. 
