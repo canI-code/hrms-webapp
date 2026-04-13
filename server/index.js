@@ -2,8 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
 
 // Route imports
@@ -31,13 +29,28 @@ import LeaveType from './models/LeaveType.js';
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
+const isVercel = process.env.VERCEL === '1';
+let initialized = false;
+
+const allowedOrigins = (process.env.CLIENT_URLS || process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -63,45 +76,51 @@ app.use('/api/performance', performanceRoutes);
 app.use('/api/recruitment', recruitmentRoutes);
 app.use('/api/messages', messageRoutes);
 
-// Serve frontend in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '..', 'dist')));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
-  });
-}
-
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB before starting the server
-const startServer = async () => {
-  try {
-    await connectDB();
+const initializeApp = async () => {
+  if (initialized) return;
 
-    // Auto-seed default leave types if none exist
-    const leaveTypeCount = await LeaveType.countDocuments();
-    if (leaveTypeCount === 0) {
-      await LeaveType.insertMany([
-        { name: 'Casual Leave', description: 'For personal/casual reasons', daysPerYear: 12, carryForward: false },
-        { name: 'Sick Leave', description: 'For illness or medical needs', daysPerYear: 10, carryForward: false },
-        { name: 'Earned Leave', description: 'Privilege/earned leave, can be carried forward', daysPerYear: 15, carryForward: true },
-        { name: 'Maternity Leave', description: 'Maternity leave as per policy', daysPerYear: 180, carryForward: false },
-        { name: 'Paternity Leave', description: 'Paternity leave as per policy', daysPerYear: 15, carryForward: false },
-      ]);
-      console.log('Default leave types seeded');
-    }
+  await connectDB();
 
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-
-    // Run document expiry check on startup, then every 24 hours
-    checkDocumentExpiry();
-    setInterval(checkDocumentExpiry, 24 * 60 * 60 * 1000);
-  } catch (error) {
-    console.error('Failed to start server:', error.message);
-    process.exit(1);
+  // Auto-seed default leave types if none exist
+  const leaveTypeCount = await LeaveType.countDocuments();
+  if (leaveTypeCount === 0) {
+    await LeaveType.insertMany([
+      { name: 'Casual Leave', description: 'For personal/casual reasons', daysPerYear: 12, carryForward: false },
+      { name: 'Sick Leave', description: 'For illness or medical needs', daysPerYear: 10, carryForward: false },
+      { name: 'Earned Leave', description: 'Privilege/earned leave, can be carried forward', daysPerYear: 15, carryForward: true },
+      { name: 'Maternity Leave', description: 'Maternity leave as per policy', daysPerYear: 180, carryForward: false },
+      { name: 'Paternity Leave', description: 'Paternity leave as per policy', daysPerYear: 15, carryForward: false },
+    ]);
+    console.log('Default leave types seeded');
   }
+
+  initialized = true;
 };
 
-startServer();
+if (!isVercel) {
+  const startServer = async () => {
+    try {
+      await initializeApp();
+      app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+      });
+
+      // Run document expiry check on startup, then every 24 hours.
+      // Vercel functions are ephemeral, so background intervals are disabled there.
+      checkDocumentExpiry();
+      setInterval(checkDocumentExpiry, 24 * 60 * 60 * 1000);
+    } catch (error) {
+      console.error('Failed to start server:', error.message);
+      process.exit(1);
+    }
+  };
+
+  startServer();
+}
+
+export default async function handler(req, res) {
+  await initializeApp();
+  return app(req, res);
+}

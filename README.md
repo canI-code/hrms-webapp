@@ -56,6 +56,19 @@ The app opens at **http://localhost:5173**. On first launch, you'll be prompted 
 | `npm start` | Start production server |
 | `npm run seed` | Seed database with sample data (departments, leave types, holidays) |
 
+## Deploy to Vercel
+
+1. Import this repository into Vercel.
+2. Set the **Root Directory** to `hrms-webapp` (if your repo has multiple folders).
+3. Add all required environment variables from `.env.example` in Vercel Project Settings.
+4. Set `CLIENT_URLS` to include your Vercel URL, for example:
+   - `https://your-project.vercel.app`
+5. Deploy.
+
+This project includes `vercel.json` so:
+- frontend routes are served as a SPA,
+- `/api/*` routes are handled by the Express backend.
+
 ## License
 
 ISC
