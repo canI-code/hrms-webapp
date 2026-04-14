@@ -59,13 +59,13 @@ export const sendOtpEmail = async (to, otp, userName) => {
         </div>
         <p style="color: #6b7280; font-size: 13px;">If you didn't request this, please ignore this email. Your password will remain unchanged.</p>
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
-    // Check if auth is configured
-    if (!transporter.options.auth?.user && !transporter.options.host) {
-      console.warn('⚠️ SMTP/Email credentials not configured. Email not sent.');
-      console.warn(`[DEV] OTP that would have been sent to ${to}: ${otp}`);
-      return; // Skip sending email
-    }
+        <p style="color: #9ca3af; font-size: 12px; text-align: center;">HRMS — Human Resource Management System</p>
+      </div>
+    `,
+  };
 
+  try {
+    const transporter = getTransporter();
     await transporter.sendMail(mailOptions);
   } catch (error) {
     console.error('Error sending email:', error.message);
