@@ -57,5 +57,19 @@ export const sendOtpEmail = async (to, otp, userName) => {
     `,
   };
 
-  await getTransporter().sendMail(mailOptions);
+  try {
+    const transporter = getTransporter();
+    
+    // Check if auth is configured
+    if (!transporter.options.auth?.user && !transporter.options.host) {
+      console.warn('⚠️ SMTP/Email credentials not configured. Email not sent.');
+      console.warn(`[DEV] OTP that would have been sent to ${to}: ${otp}`);
+      return; // Skip sending email
+    }
+
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error('Error sending email:', error.message);
+    throw new Error('Failed to send email. Check your SMTP configuration.');
+  }
 };
