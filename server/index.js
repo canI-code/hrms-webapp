@@ -42,11 +42,16 @@ const allowedOrigins = (process.env.CLIENT_URLS || process.env.CLIENT_URL || 'ht
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow localhost, explicitly defined CLIENT_URLS, and all Vercel deployments automatically
+      if (
+        !origin || 
+        allowedOrigins.includes(origin) || 
+        (origin && origin.endsWith('.vercel.app'))
+      ) {
         callback(null, true);
         return;
       }
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error(`Not allowed by CORS: ${origin}`));
     },
     credentials: true,
   })
