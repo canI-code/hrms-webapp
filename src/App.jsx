@@ -25,7 +25,7 @@ import AnnouncementList from './pages/announcements/AnnouncementList';
 import HolidayList from './pages/holidays/HolidayList';
 import AuditLogs from './pages/audit/AuditLogs';
 import MyProfile from './pages/profile/MyProfile';
-import CompanySettings from './pages/settings/CompanySettings';
+// import CompanySettings from './pages/settings/CompanySettings';
 import Reports from './pages/reports/Reports';
 import PerformanceReviews from './pages/performance/PerformanceReviews';
 import Recruitment from './pages/recruitment/Recruitment';
@@ -130,11 +130,13 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/profile" element={<MyProfile />} />
+          {/* Settings module removed as requested
           <Route path="/settings" element={
             <ProtectedRoute roles={['super_admin']}>
               <CompanySettings />
             </ProtectedRoute>
           } />
+          */}
           <Route path="/reports" element={
             <ProtectedRoute roles={['super_admin', 'hr']}>
               <Reports />

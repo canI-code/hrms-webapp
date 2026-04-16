@@ -88,7 +88,7 @@ const ProfileCompletion = () => {
             <h1 className="text-2xl font-bold">Complete Your Profile</h1>
           </div>
           <p className="text-primary-100 text-sm">
-            Welcome, {user?.name}! Please complete your profile to access the HRMS dashboard.
+            Welcome, {user?.name}! Please complete your profile to access the infeNevoCloud dashboard.
           </p>
 
           {/* System ID & Account Info */}

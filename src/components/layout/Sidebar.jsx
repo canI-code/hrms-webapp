@@ -16,7 +16,7 @@ const Sidebar = ({ onClose, collapsed, onToggleCollapse }) => {
     { to: '/employees', icon: FiUsers, label: 'Employees', roles: ['super_admin', 'hr', 'manager'] },
     { to: '/departments', icon: FiGrid, label: 'Departments', roles: ['super_admin', 'hr'] },
     { to: '/leaves', icon: FiCalendar, label: 'Leaves', roles: ['super_admin', 'hr', 'manager', 'employee'] },
-    { to: '/leaves/approvals', icon: FiCalendar, label: 'Leave Approvals', roles: ['hr', 'manager'] },
+    { to: '/leaves/approvals', icon: FiCalendar, label: 'Leave Approvals', roles: ['hr'] },
     { to: '/leave-types', icon: FiCalendar, label: 'Leave Types', roles: ['super_admin', 'hr'] },
     { to: '/leave-balances', icon: FiCalendar, label: 'Leave Balances', roles: ['hr'] },
     { to: '/payroll', icon: FiDollarSign, label: 'Payroll', roles: ['super_admin', 'hr'] },
@@ -31,7 +31,6 @@ const Sidebar = ({ onClose, collapsed, onToggleCollapse }) => {
     { to: '/performance', icon: FiAward, label: 'Performance', roles: ['super_admin', 'hr', 'manager', 'employee'] },
     { to: '/recruitment', icon: FiBriefcase, label: 'Recruitment', roles: ['super_admin', 'hr'] },
     { to: '/messages', icon: FiMessageSquare, label: 'Messages', roles: ['super_admin', 'hr', 'manager', 'employee'] },
-    { to: '/settings', icon: FiGrid, label: 'Settings', roles: ['super_admin'] },
   ];
 
   const filteredItems = navItems.filter(item => item.roles.includes(role));
@@ -44,7 +43,7 @@ const Sidebar = ({ onClose, collapsed, onToggleCollapse }) => {
           <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
             <FiShield className="text-white text-lg" />
           </div>
-          {!collapsed && <span className="text-xl font-bold text-gray-800 whitespace-nowrap">HRMS</span>}
+          {!collapsed && <span className="text-xl font-bold text-gray-800 whitespace-nowrap">infeNevoCloud</span>}
         </div>
         <button onClick={onClose} className="lg:hidden text-gray-500 hover:text-gray-700">
           <FiX size={20} />

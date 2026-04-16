@@ -547,10 +547,12 @@ const Dashboard = () => {
               <FiCheckCircle className="mx-auto text-2xl text-green-500 mb-2" />
               <p className="text-sm font-medium text-gray-700">Check In</p>
             </Link>
-            <Link to="/leaves/apply" className="bg-white rounded-xl border p-4 text-center hover:bg-gray-50 transition">
-              <FiCalendar className="mx-auto text-2xl text-amber-500 mb-2" />
-              <p className="text-sm font-medium text-gray-700">Apply Leave</p>
-            </Link>
+            {user?.role !== 'hr' && (
+              <Link to="/leaves/apply" className="bg-white rounded-xl border p-4 text-center hover:bg-gray-50 transition">
+                <FiCalendar className="mx-auto text-2xl text-amber-500 mb-2" />
+                <p className="text-sm font-medium text-gray-700">Apply Leave</p>
+              </Link>
+            )}
             <Link to="/my-payslips" className="bg-white rounded-xl border p-4 text-center hover:bg-gray-50 transition">
               <FiDollarSign className="mx-auto text-2xl text-blue-500 mb-2" />
               <p className="text-sm font-medium text-gray-700">My Payslips</p>

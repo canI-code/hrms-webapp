@@ -37,6 +37,11 @@ export const applyLeave = async (req, res) => {
       return res.status(403).json({ message: 'Super admin cannot apply for leave' });
     }
 
+    // HR taking leave from portal is disabled (must be done offline)
+    if (req.user.role === 'hr') {
+      return res.status(403).json({ message: 'HR must take leave requests offline.' });
+    }
+
     const { leaveType, startDate, endDate, reason } = req.body;
     const employee = await Employee.findOne({ user: req.user._id }).populate('manager');
     if (!employee) return res.status(404).json({ message: 'Employee profile not found' });
@@ -62,39 +67,9 @@ export const applyLeave = async (req, res) => {
       });
     }
 
-    // Determine approval flow based on applicant's role
-    // Employee: Pending → Manager approves → HR final approval
-    // Manager: skip manager step → HR approves directly
-    // HR: special handling based on available approvers
-    const applicantRole = req.user.role;
-    let initialStatus = 'Pending';
-    let managerApprovalData = { status: 'Pending' };
-
-    if (applicantRole === 'manager') {
-      // Managers skip the manager approval step — goes directly to HR
-      initialStatus = 'Approved_By_Manager';
-      managerApprovalData = { status: 'Approved', comment: 'Auto-skipped (applicant is a manager)' };
-    } else if (applicantRole === 'hr') {
-      // Check if peer HR exists (another active HR user who can approve)
-      const peerHRCount = await User.countDocuments({
-        role: 'hr', isActive: true, _id: { $ne: req.user._id }
-      });
-
-      if (employee.manager) {
-        // HR with a manager assigned → manager approves first
-        initialStatus = 'Pending';
-        managerApprovalData = { status: 'Pending' };
-      } else if (peerHRCount > 0) {
-        // HR without manager but peer HR exists → skip manager, peer HR approves
-        initialStatus = 'Approved_By_Manager';
-        managerApprovalData = { status: 'Approved', comment: 'Auto-skipped (no manager assigned)' };
-      } else {
-        // Only HR in the system with no manager → any manager can approve
-        initialStatus = 'Pending';
-        managerApprovalData = { status: 'Pending' };
-      }
-    }
-    // Employee role: stays as Pending (standard two-level flow)
+    // All leaves go straight to HR for approval
+    const initialStatus = 'Pending';
+    const managerApprovalData = { status: 'Approved', comment: 'Auto-skipped (manager approval disabled)' };
 
     const leave = await Leave.create({
       employee: employee._id,
@@ -125,46 +100,20 @@ export const applyLeave = async (req, res) => {
     const empName = `${populated.employee.firstName} ${populated.employee.lastName}`;
     const typeName = populated.leaveType?.name || 'Leave';
 
-    // Send notifications based on approval flow
-    if (initialStatus === 'Pending') {
-      if (employee.manager?.user) {
-        // Notify the direct manager
-        await createNotification({
-          recipientId: employee.manager.user,
-          type: 'leave_applied',
-          title: 'New Leave Request',
-          message: `${empName} applied for ${totalDays} day(s) of ${typeName}`,
-          link: '/leaves/approvals'
-        });
-      } else {
-        // HR or employee with no manager — notify all managers so someone can approve
-        const allManagers = await User.find({ role: 'manager', isActive: true });
-        for (const mgr of allManagers) {
-          await createNotification({
-            recipientId: mgr._id,
-            type: 'leave_applied',
-            title: 'Leave Request (No Direct Manager)',
-            message: `${empName} applied for ${totalDays} day(s) of ${typeName} — needs manager approval`,
-            link: '/leaves/approvals'
-          });
-        }
-      }
-    } else {
-      // Goes directly to HR step — notify HR users (exclude self if applicant is HR)
-      const hrUsers = await User.find({
-        role: 'hr',
-        isActive: true,
-        _id: { $ne: req.user._id }
+    // Notify all HR users about the new leave request
+    const hrUsers = await User.find({
+      role: 'hr',
+      isActive: true,
+      _id: { $ne: req.user._id }
+    });
+    for (const hr of hrUsers) {
+      await createNotification({
+        recipientId: hr._id,
+        type: 'leave_applied',
+        title: 'New Leave Request',
+        message: `${empName} applied for ${totalDays} day(s) of ${typeName} — needs HR approval`,
+        link: '/leaves/approvals'
       });
-      for (const hr of hrUsers) {
-        await createNotification({
-          recipientId: hr._id,
-          type: 'leave_applied',
-          title: applicantRole === 'manager' ? 'Manager Leave Request' : 'HR Peer Leave Request',
-          message: `${empName} applied for ${totalDays} day(s) of ${typeName} — needs your approval`,
-          link: '/leaves/approvals'
-        });
-      }
     }
 
     res.status(201).json(populated);
@@ -190,23 +139,7 @@ export const getLeaves = async (req, res) => {
         const teamMembers = await Employee.find({ manager: managerEmp._id }).select('_id');
         const teamIds = teamMembers.map(m => m._id);
         teamIds.push(managerEmp._id); // include own leaves
-
-        // Also include HR employees' Pending leaves (HR has no manager or manager is this person)
-        // so managers can approve HR leaves
-        const hrUsers = await User.find({ role: 'hr', isActive: true }).select('_id');
-        const hrEmployees = await Employee.find({
-          user: { $in: hrUsers.map(u => u._id) },
-          $or: [
-            { manager: managerEmp._id }, // HR reporting to this manager
-            { manager: { $exists: false } }, // HR with no manager
-            { manager: null }
-          ]
-        }).select('_id');
-        const hrIds = hrEmployees.map(e => e._id);
-
-        // Combine: team members + HR employees this manager can approve
-        const allIds = [...new Set([...teamIds.map(id => id.toString()), ...hrIds.map(id => id.toString())])];
-        filter.employee = { $in: allIds };
+        filter.employee = { $in: teamIds };
       }
     }
     // HR and super_admin see all
@@ -358,18 +291,9 @@ export const hrAction = async (req, res) => {
       return res.status(403).json({ message: 'You cannot approve or reject your own leave request' });
     }
 
-    // Only Approved_By_Manager or Pending (HR override) leaves can be acted on
-    if (!['Pending', 'Approved_By_Manager'].includes(leave.status)) {
+    // Only Pending leaves can be acted on (since manager approval is disabled)
+    if (leave.status !== 'Pending' && leave.status !== 'Approved_By_Manager') {
       return res.status(400).json({ message: 'This leave is not awaiting approval' });
-    }
-
-    // If leave is still Pending (HR override — bypassing manager step)
-    if (leave.status === 'Pending') {
-      leave.managerApproval = {
-        status: 'Approved',
-        comment: 'Overridden by HR',
-        date: new Date()
-      };
     }
 
     leave.hrApproval = {

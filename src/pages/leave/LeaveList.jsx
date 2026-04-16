@@ -7,7 +7,7 @@ import { FiPlus, FiXCircle, FiLogIn } from 'react-icons/fi';
 
 const statusColors = {
   Pending: 'bg-yellow-100 text-yellow-700',
-  Approved_By_Manager: 'bg-blue-100 text-blue-700',
+
   Approved: 'bg-green-100 text-green-700',
   Rejected: 'bg-red-100 text-red-700',
   Cancelled: 'bg-gray-100 text-gray-500',
@@ -75,12 +75,12 @@ const LeaveList = () => {
             className="border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500">
             <option value="">All Status</option>
             <option value="Pending">Pending</option>
-            <option value="Approved_By_Manager">Awaiting HR Approval</option>
+
             <option value="Approved">Approved</option>
             <option value="Rejected">Rejected</option>
             <option value="Cancelled">Cancelled</option>
           </select>
-          {!isSuperAdmin && (
+          {(!isSuperAdmin && user?.role !== 'hr') && (
             <Link to="/leaves/apply" className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 text-sm">
               <FiPlus /> Apply Leave
             </Link>
@@ -130,7 +130,7 @@ const LeaveList = () => {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      {['Pending', 'Approved_By_Manager'].includes(leave.status) && !isSuperAdmin && (
+                        {leave.status === 'Pending' && !isSuperAdmin && (
                         <button onClick={() => handleCancel(leave._id)} className="text-red-600 hover:text-red-800" title="Cancel">
                           <FiXCircle size={16} />
                         </button>

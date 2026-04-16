@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {
-  applyLeave, getLeaves, managerAction, hrAction, cancelLeave, endLeaveEarly,
+  applyLeave, getLeaves, hrAction, cancelLeave, endLeaveEarly,
   getLeaveTypes, createLeaveType, updateLeaveType, deleteLeaveType,
   getLeaveBalance, adjustLeaveBalance
 } from '../controllers/leave.controller.js';
@@ -15,8 +15,7 @@ router.put('/balance', protect, authorize('hr'), adjustLeaveBalance);
 router.put('/types/:id', protect, authorize('super_admin', 'hr'), updateLeaveType);
 router.delete('/types/:id', protect, authorize('super_admin', 'hr'), deleteLeaveType);
 router.get('/', protect, getLeaves);
-router.post('/', protect, authorize('employee', 'manager', 'hr'), applyLeave);
-router.put('/:id/manager-action', protect, authorize('manager'), managerAction);
+router.post('/', protect, authorize('employee', 'manager'), applyLeave);
 router.put('/:id/hr-action', protect, authorize('hr'), hrAction);
 router.put('/:id/cancel', protect, cancelLeave);
 router.put('/:id/end-early', protect, endLeaveEarly);

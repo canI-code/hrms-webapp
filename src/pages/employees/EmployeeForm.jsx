@@ -93,91 +93,6 @@ const EmployeeForm = () => {
     }
   };
 
-  const fillDemoData = () => {
-    const role = form.role;
-
-    const firstNames = ['Aarav', 'Vivaan', 'Aditya', 'Vihaan', 'Arjun', 'Reyansh', 'Sai', 'Arnav', 'Dhruv', 'Kabir',
-      'Ananya', 'Diya', 'Myra', 'Aadhya', 'Isha', 'Kiara', 'Saanvi', 'Anika', 'Riya', 'Priya'];
-    const lastNames = ['Sharma', 'Verma', 'Patel', 'Gupta', 'Singh', 'Kumar', 'Reddy', 'Joshi', 'Iyer', 'Nair',
-      'Chauhan', 'Malhotra', 'Kapoor', 'Mehta', 'Desai', 'Bhat', 'Pillai', 'Rao', 'Mishra', 'Banerjee'];
-    const streets = ['12 MG Road', '45 Brigade Road', '78 Park Street', '23 Jubilee Hills', '56 Banjara Hills',
-      '91 Koramangala 4th Block', '34 Connaught Place', '67 Marine Drive', '15 Anna Nagar', '88 Indiranagar'];
-    const cities = ['Bangalore', 'Mumbai', 'Delhi', 'Hyderabad', 'Chennai', 'Pune', 'Kolkata', 'Ahmedabad'];
-    const states = ['Karnataka', 'Maharashtra', 'Delhi', 'Telangana', 'Tamil Nadu', 'Maharashtra', 'West Bengal', 'Gujarat'];
-    const zips = ['560001', '400001', '110001', '500001', '600001', '411001', '700001', '380001'];
-    const banks = ['State Bank of India', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra Bank', 'Punjab National Bank'];
-    const relations = ['Father', 'Mother', 'Spouse', 'Sibling', 'Friend'];
-    const genders = ['male', 'female'];
-
-    const designations = {
-      hr: ['HR Manager', 'HR Executive', 'HR Business Partner', 'Talent Acquisition Lead', 'People Operations Manager'],
-      manager: ['Engineering Manager', 'Product Manager', 'Operations Manager', 'Project Manager', 'Delivery Manager'],
-      employee: ['Software Engineer', 'Business Analyst', 'QA Engineer', 'UI/UX Designer', 'Data Analyst', 'DevOps Engineer']
-    };
-
-    const salaryRanges = {
-      hr: { basic: 55000, hra: 22000, allowances: 8000, deductions: 2000, pf: 6600, esi: 1300, tax: 5500 },
-      manager: { basic: 75000, hra: 30000, allowances: 12000, deductions: 3000, pf: 9000, esi: 0, tax: 9500 },
-      employee: { basic: 35000, hra: 14000, allowances: 5000, deductions: 1000, pf: 4200, esi: 650, tax: 2500 }
-    };
-
-    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-    const randPhone = () => '9' + Math.floor(100000000 + Math.random() * 900000000);
-    const randAcct = () => String(Math.floor(10000000000 + Math.random() * 90000000000));
-    const randIFSC = () => pick(['SBIN', 'HDFC', 'ICIC', 'UTIB', 'KKBK', 'PUNB']) + '0' + Math.floor(100000 + Math.random() * 900000);
-    const randDOB = () => {
-      const y = 1985 + Math.floor(Math.random() * 15);
-      const m = String(1 + Math.floor(Math.random() * 12)).padStart(2, '0');
-      const d = String(1 + Math.floor(Math.random() * 28)).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    };
-
-    const cityIdx = Math.floor(Math.random() * cities.length);
-    const gender = pick(genders);
-    const firstName = gender === 'male'
-      ? pick(firstNames.slice(0, 10))
-      : pick(firstNames.slice(10));
-
-    setForm(prev => ({
-      ...prev,
-      firstName,
-      lastName: pick(lastNames),
-      email: '',  // intentionally blank for real email entry
-      phone: randPhone(),
-      dateOfBirth: randDOB(),
-      gender,
-      maritalStatus: pick(['Single', 'Married']),
-      department: departments.length > 0
-        ? departments[Math.floor(Math.random() * departments.length)]._id
-        : pick(presetDepartments),
-      designation: pick(designations[role] || designations.employee),
-      manager: managers.length > 0 ? managers[Math.floor(Math.random() * managers.length)]._id : '',
-      dateOfJoining: new Date().toISOString().split('T')[0],
-      employmentType: 'Full-time',
-      password: 'password123',
-      address: {
-        street: pick(streets),
-        city: cities[cityIdx],
-        state: states[cityIdx],
-        zipCode: zips[cityIdx],
-        country: 'India'
-      },
-      salary: { ...salaryRanges[role] } || { ...salaryRanges.employee },
-      bankDetails: {
-        bankName: pick(banks),
-        accountNumber: randAcct(),
-        ifscCode: randIFSC()
-      },
-      emergencyContact: {
-        name: pick(firstNames) + ' ' + pick(lastNames),
-        relation: pick(relations),
-        phone: randPhone()
-      }
-    }));
-
-    toast.info('Demo data filled — enter a real email to proceed');
-  };
-
   const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none";
   const labelClass = "block text-sm font-medium text-gray-700 mb-1";
 
@@ -190,12 +105,6 @@ const EmployeeForm = () => {
         <h1 className="text-2xl font-bold text-gray-800">
           {isEdit ? 'Edit' : 'Add'} {form.role === 'hr' ? 'HR' : form.role === 'manager' ? 'Manager' : 'Employee'}
         </h1>
-        {!isEdit && (
-          <button type="button" onClick={fillDemoData}
-            className="ml-auto flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
-            <FiZap size={15} /> Demo Fill
-          </button>
-        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
