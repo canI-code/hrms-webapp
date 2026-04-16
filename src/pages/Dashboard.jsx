@@ -210,12 +210,22 @@ const Dashboard = () => {
               <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2"><FiUsers className="text-blue-500" /> Staff by Role</h3>
               {data.employeesByRole?.length > 0 ? (
                 <div className="space-y-2">
-                  {data.employeesByRole.map(r => (
-                    <div key={r._id} className="flex items-center justify-between p-2 bg-blue-50 rounded-lg text-sm">
-                      <span className="font-medium text-gray-800 capitalize">{r._id?.replace('_', ' ')}</span>
-                      <span className="font-bold text-blue-700">{r.count}</span>
-                    </div>
-                  ))}
+                    {data.employeesByRole.map(r => {
+                      const colors = {
+                        super_admin: 'bg-red-50 text-red-700',
+                        hr_manager: 'bg-purple-50 text-purple-700',
+                        department_head: 'bg-amber-50 text-amber-700',
+                        employee: 'bg-blue-50 text-blue-700'
+                      };
+                      const roleColor = colors[r._id] || 'bg-gray-50 text-gray-700';
+
+                      return (
+                        <div key={r._id} className={`flex items-center justify-between p-2 rounded-lg text-sm ${roleColor.split(' ')[0]}`}>
+                          <span className={`font-medium capitalize ${roleColor.split(' ')[1]}`}>{r._id?.replace('_', ' ')}</span>
+                          <span className={`font-bold ${roleColor.split(' ')[1]}`}>{r.count}</span>
+                        </div>
+                      );
+                    })}
                 </div>
               ) : <p className="text-gray-400 text-sm">No data</p>}
             </div>

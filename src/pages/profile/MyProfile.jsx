@@ -33,12 +33,12 @@ const MyProfile = () => {
 
   useEffect(() => {
     fetchProfile();
-    fetchDocuments();
   }, []);
 
   const fetchProfile = async () => {
     try {
       const res = await getProfileAPI();
+      setProfile(res.data);
       setEditForm({
         phone: res.data.phone || '',
         alternateEmail: res.data.alternateEmail || '',
@@ -55,14 +55,13 @@ const MyProfile = () => {
     }
   };
 
-  const fetchDocuments = async () => {
-    setDocsLoading(true);
-    try {
-      const res = await getMyDocumentsAPI();
-      setDocuments(res.data);
-    } catch {
-      // silently fail - super_admin or users without employee record
-    } fiData.append('avatar', file);
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.length ? e.target.files[0] : null;
+    if (!file) return;
+    
+    setAvatarUploading(true);
+    const formData = new FormData();
+    formData.append('avatar', file);
     try {
       const res = await uploadMyAvatarAPI(formData);
       setProfile(prev => ({ ...prev, avatar: res.data.url }));
