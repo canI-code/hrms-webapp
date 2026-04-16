@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   FiHome, FiUsers, FiCalendar, FiDollarSign, FiClock,
   FiGrid, FiBell, FiStar, FiFileText, FiX,
-  FiChevronsLeft, FiChevronsRight, FiBriefcase, FiMessageSquare, FiAward
+  FiChevronsLeft, FiChevronsRight, FiBriefcase, FiMessageSquare, FiAward, FiShield
 } from 'react-icons/fi';
 
 const Sidebar = ({ onClose, collapsed, onToggleCollapse }) => {
