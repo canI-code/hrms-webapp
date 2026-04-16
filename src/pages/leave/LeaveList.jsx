@@ -80,7 +80,7 @@ const LeaveList = () => {
             <option value="Rejected">Rejected</option>
             <option value="Cancelled">Cancelled</option>
           </select>
-          {!isSuperAdmin && (
+          {!isSuperAdmin && user?.role !== 'hr' && (
             <Link to="/leaves/apply" className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 text-sm">
               <FiPlus /> Apply Leave
             </Link>

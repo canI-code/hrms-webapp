@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { getProfileAPI, updatePasswordAPI, updateProfileAPI, getLoginLogsAPI, uploadMyAvatarAPI, getMyDocumentsAPI, viewDocumentURL, downloadDocumentURL } from '../../api/axios';
+import { getProfileAPI, updatePasswordAPI, updateProfileAPI, getLoginLogsAPI, uploadMyAvatarAPI } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import {
   FiUser, FiLock, FiSave, FiPhone, FiMail, FiCalendar, FiMapPin,
   FiEye, FiEyeOff, FiAlertCircle, FiClock, FiEdit2, FiX, FiCheck,
   FiLogIn, FiLogOut, FiChevronLeft, FiChevronRight, FiHash,
-  FiCamera, FiFile, FiDownload, FiExternalLink, FiFileText
+  FiCamera
 } from 'react-icons/fi';
 
 const MyProfile = () => {
@@ -19,12 +19,6 @@ const MyProfile = () => {
   const [saving, setSaving] = useState(false);
   const [pwd, setPwd] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [avatarUploading, setAvatarUploading] = useState(false);
-
-  // Documents state
-  const [documents, setDocuments] = useState([]);
-  const [docsLoading, setDocsLoading] = useState(false);
-  const [showDocs, setShowDocs] = useState(false);
-  const [previewDoc, setPreviewDoc] = useState(null);
 
   // Login logs state
   const [logs, setLogs] = useState([]);
@@ -45,7 +39,6 @@ const MyProfile = () => {
   const fetchProfile = async () => {
     try {
       const res = await getProfileAPI();
-      setProfile(res.data);
       setEditForm({
         phone: res.data.phone || '',
         alternateEmail: res.data.alternateEmail || '',
@@ -69,19 +62,7 @@ const MyProfile = () => {
       setDocuments(res.data);
     } catch {
       // silently fail - super_admin or users without employee record
-    } finally {
-      setDocsLoading(false);
-    }
-  };
-
-  const handleAvatarUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) return toast.error('Please select an image file');
-    if (file.size > 5 * 1024 * 1024) return toast.error('Image must be less than 5MB');
-    setAvatarUploading(true);
-    const formData = new FormData();
-    formData.append('avatar', file);
+    } fiData.append('avatar', file);
     try {
       const res = await uploadMyAvatarAPI(formData);
       setProfile(prev => ({ ...prev, avatar: res.data.url }));
@@ -457,139 +438,6 @@ const MyProfile = () => {
           </form>
         )}
       </div>
-
-      {/* My Documents */}
-      {user?.role !== 'super_admin' && (
-        <div className="bg-white rounded-xl shadow-sm border">
-          <button onClick={() => setShowDocs(!showDocs)}
-            className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors">
-            <span className="flex items-center gap-2 font-medium text-gray-800">
-              <FiFileText /> My Documents
-              {documents.length > 0 && (
-                <span className="bg-primary-100 text-primary-700 text-xs px-2 py-0.5 rounded-full">{documents.length}</span>
-              )}
-            </span>
-            <span className="text-sm text-primary-600">{showDocs ? 'Close' : 'View'}</span>
-          </button>
-
-          {showDocs && (
-            <div className="px-6 pb-6">
-              {docsLoading ? (
-                <div className="py-8 text-center text-gray-400">Loading documents...</div>
-              ) : documents.length === 0 ? (
-                <div className="py-8 text-center text-gray-400">No documents uploaded yet.</div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {documents.map(doc => {
-                    const isPdf = doc.mimeType === 'application/pdf' || doc.url?.toLowerCase().endsWith('.pdf');
-                    const isImage = doc.mimeType?.startsWith('image/');
-                    return (
-                      <div key={doc._id} className="bg-gray-50 border rounded-xl p-3 flex flex-col hover:shadow-md transition-shadow group">
-                        {/* Thumbnail */}
-                        <div className="w-full aspect-square rounded-lg bg-white border flex items-center justify-center overflow-hidden mb-2 cursor-pointer relative"
-                          onClick={() => setPreviewDoc(doc)}>
-                          {isImage ? (
-                            <img src={doc.url} alt={doc.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="flex flex-col items-center justify-center">
-                              <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${isPdf ? 'bg-red-100' : 'bg-primary-100'}`}>
-                                <FiFile className={isPdf ? 'text-red-500' : 'text-primary-600'} size={24} />
-                              </div>
-                              <span className="text-[10px] text-gray-400 mt-1 uppercase font-medium">
-                                {isPdf ? 'PDF' : doc.mimeType?.split('/').pop()?.toUpperCase() || 'FILE'}
-                              </span>
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                            <FiEye className="text-white" size={22} />
-                          </div>
-                        </div>
-                        {/* Info */}
-                        <p className="text-xs font-semibold text-gray-800 truncate" title={doc.name}>{doc.name}</p>
-                        <span className="inline-block text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded mt-1 w-fit">{doc.type}</span>
-                        {doc.description && (
-                          <p className="text-[10px] text-gray-400 mt-0.5 line-clamp-2" title={doc.description}>{doc.description}</p>
-                        )}
-                        <p className="text-[10px] text-gray-400 mt-auto pt-1">
-                          {new Date(doc.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                          {doc.uploadedBy?.name && <span> &middot; {doc.uploadedBy.name}</span>}
-                        </p>
-                        {/* Actions */}
-                        <div className="flex items-center gap-1 mt-2 pt-2 border-t">
-                          <button onClick={() => setPreviewDoc(doc)}
-                            className="flex-1 flex items-center justify-center gap-1 text-[10px] text-emerald-600 hover:bg-emerald-50 rounded py-1 font-medium">
-                            <FiEye size={12} /> View
-                          </button>
-                          <a href={downloadDocumentURL(doc._id)} target="_blank" rel="noopener noreferrer"
-                            className="flex-1 flex items-center justify-center gap-1 text-[10px] text-blue-600 hover:bg-blue-50 rounded py-1 font-medium">
-                            <FiDownload size={12} /> Download
-                          </a>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Document Preview Modal */}
-      {previewDoc && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b">
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-800 truncate">{previewDoc.name}</h3>
-                <div className="flex flex-wrap items-center gap-2 mt-0.5">
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{previewDoc.type}</span>
-                  <span className="text-xs text-gray-400">
-                    {new Date(previewDoc.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                  </span>
-                  {previewDoc.uploadedBy?.name && (
-                    <span className="text-xs text-gray-400">by {previewDoc.uploadedBy.name}</span>
-                  )}
-                </div>
-                {previewDoc.description && (
-                  <p className="text-xs text-gray-500 mt-1">{previewDoc.description}</p>
-                )}
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                <a href={downloadDocumentURL(previewDoc._id)} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 px-3 py-1.5 rounded-lg hover:bg-blue-50">
-                  <FiDownload size={14} /> Download
-                </a>
-                <button onClick={() => setPreviewDoc(null)}
-                  className="text-gray-400 hover:text-gray-600 p-1">
-                  <FiX size={20} />
-                </button>
-              </div>
-            </div>
-            <div className="flex-1 overflow-auto p-4 bg-gray-100 flex items-center justify-center min-h-[400px]">
-              {previewDoc.mimeType?.startsWith('image/') ? (
-                <img src={viewDocumentURL(previewDoc._id)} alt={previewDoc.name}
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow" />
-              ) : previewDoc.mimeType === 'application/pdf' || previewDoc.url?.toLowerCase().endsWith('.pdf') ? (
-                <iframe
-                  src={viewDocumentURL(previewDoc._id)}
-                  title={previewDoc.name}
-                  className="w-full h-[70vh] rounded-lg border bg-white" />
-              ) : (
-                <div className="text-center py-16">
-                  <FiFile className="mx-auto text-gray-300 mb-4" size={64} />
-                  <p className="text-gray-500 mb-2">Preview not available for this file type</p>
-                  <p className="text-xs text-gray-400 mb-4">{previewDoc.mimeType || 'Unknown type'}</p>
-                  <a href={downloadDocumentURL(previewDoc._id)} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-primary-700">
-                    <FiDownload size={14} /> Download to view
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Login/Logout Logs */}
       <div className="bg-white rounded-xl shadow-sm border">

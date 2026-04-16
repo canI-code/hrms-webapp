@@ -72,7 +72,7 @@ function App() {
           <Route path="/employees/:id" element={<EmployeeProfile />} />
           <Route path="/leaves" element={<LeaveList />} />
           <Route path="/leaves/apply" element={
-            <ProtectedRoute roles={['employee', 'manager', 'hr']}>
+            <ProtectedRoute roles={['employee', 'manager']}>
               <LeaveApply />
             </ProtectedRoute>
           } />
@@ -87,7 +87,7 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/leave-balances" element={
-            <ProtectedRoute roles={['hr']}>
+            <ProtectedRoute roles={['super_admin']}>
               <LeaveBalanceManager />
             </ProtectedRoute>
           } />

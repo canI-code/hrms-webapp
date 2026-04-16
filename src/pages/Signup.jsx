@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { checkSetupAPI, initialSetupAPI } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { FiShield, FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiBriefcase, FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -67,9 +67,9 @@ const Signup = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-4">
-            <FiShield className="text-primary-600 text-3xl" />
+            <FiBriefcase className="text-primary-600 text-3xl" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Initial Setup</h1>
+          <h1 className="text-2xl font-bold text-gray-800">InfeNevo Cloud Setup</h1>
           <p className="text-gray-500 mt-1">Create your Super Admin account</p>
         </div>
 

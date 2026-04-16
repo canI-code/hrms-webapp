@@ -623,8 +623,8 @@ export const getLeaveBalance = async (req, res) => {
   try {
     let employeeId;
     if (req.query.employeeId) {
-      // Only hr/super_admin can view any employee's balance
-      if (['hr', 'super_admin'].includes(req.user.role)) {
+      // Only super_admin can view any employee's balance
+      if (req.user.role === 'super_admin') {
         employeeId = req.query.employeeId;
       } else if (req.user.role === 'manager') {
         // Manager can only view team members' balance
@@ -633,6 +633,13 @@ export const getLeaveBalance = async (req, res) => {
         const teamIds = teamMembers.map(m => m._id.toString());
         if (!teamIds.includes(req.query.employeeId.toString())) {
           return res.status(403).json({ message: 'Access denied: not your team member' });
+        }
+        employeeId = req.query.employeeId;
+      } else if (req.user.role === 'hr') {
+        // HR can only view their own balance, not other employees
+        const hrEmp = await Employee.findOne({ user: req.user._id });
+        if (!hrEmp || hrEmp._id.toString() !== req.query.employeeId.toString()) {
+          return res.status(403).json({ message: 'Access denied: HR can only view their own balance' });
         }
         employeeId = req.query.employeeId;
       } else {

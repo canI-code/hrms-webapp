@@ -1,22 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getEmployeeAPI, uploadAvatarAPI, getDocumentsAPI, uploadDocumentAPI, deleteDocumentAPI, toggleUserAPI, viewDocumentURL, downloadDocumentURL } from '../../api/axios';
+import { getEmployeeAPI, uploadAvatarAPI, toggleUserAPI } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
-import { FiArrowLeft, FiEdit, FiUpload, FiTrash2, FiDownload, FiMail, FiPhone, FiMapPin, FiCalendar, FiDollarSign, FiToggleLeft, FiToggleRight, FiX, FiFile, FiEye, FiExternalLink } from 'react-icons/fi';
+import { FiArrowLeft, FiEdit, FiUpload, FiMail, FiPhone, FiMapPin, FiCalendar, FiDollarSign, FiToggleLeft, FiToggleRight, FiX } from 'react-icons/fi';
 
 const EmployeeProfile = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
-  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('info');
-  const [showDocModal, setShowDocModal] = useState(false);
-  const [docForm, setDocForm] = useState({ name: '', type: 'Other', description: '', file: null });
-  const [docUploading, setDocUploading] = useState(false);
-  const [previewDoc, setPreviewDoc] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -24,12 +19,8 @@ const EmployeeProfile = () => {
 
   const loadData = async () => {
     try {
-      const [empRes, docsRes] = await Promise.all([
-        getEmployeeAPI(id),
-        getDocumentsAPI(id).catch(() => ({ data: [] }))
-      ]);
+      const empRes = await getEmployeeAPI(id);
       setEmployee(empRes.data);
-      setDocuments(docsRes.data);
     } catch (err) {
       toast.error('Failed to load profile');
     } finally {
@@ -48,39 +39,6 @@ const EmployeeProfile = () => {
       loadData();
     } catch (err) {
       toast.error('Upload failed');
-    }
-  };
-
-  const handleDocUpload = async (e) => {
-    e.preventDefault();
-    if (!docForm.file) return toast.error('Please select a file');
-    setDocUploading(true);
-    const formData = new FormData();
-    formData.append('document', docForm.file);
-    formData.append('name', docForm.name || docForm.file.name);
-    formData.append('type', docForm.type);
-    formData.append('description', docForm.description);
-    try {
-      await uploadDocumentAPI(id, formData);
-      toast.success('Document uploaded!');
-      setShowDocModal(false);
-      setDocForm({ name: '', type: 'Other', description: '', file: null });
-      loadData();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Upload failed');
-    } finally {
-      setDocUploading(false);
-    }
-  };
-
-  const handleDeleteDoc = async (docId) => {
-    if (!confirm('Delete this document?')) return;
-    try {
-      await deleteDocumentAPI(docId);
-      toast.success('Document deleted');
-      setDocuments(prev => prev.filter(d => d._id !== docId));
-    } catch (err) {
-      toast.error('Delete failed');
     }
   };
 
@@ -179,7 +137,7 @@ const EmployeeProfile = () => {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-4 bg-white rounded-lg shadow-sm border p-1">
-        {['info', 'salary', 'documents'].map(t => (
+        {['info', 'salary'].map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`flex-1 py-2 text-sm font-medium rounded-md capitalize transition-colors ${
               tab === t ? 'bg-primary-600 text-white' : 'text-gray-600 hover:bg-gray-50'
@@ -268,211 +226,6 @@ const EmployeeProfile = () => {
               <InfoRow label="Bank Name" value={employee.bankDetails?.bankName || '—'} />
               <InfoRow label="Account Number" value={employee.bankDetails?.accountNumber || '—'} />
               <InfoRow label="IFSC Code" value={employee.bankDetails?.ifscCode || '—'} />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {tab === 'documents' && (
-        <div className="bg-white rounded-xl shadow-sm border p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-800">Documents</h3>
-            {(isOwner || isHR) && (
-              <button onClick={() => setShowDocModal(true)}
-                className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-primary-700">
-                <FiUpload /> Upload Document
-              </button>
-            )}
-          </div>
-          {documents.length === 0 ? (
-            <p className="text-center text-gray-400 py-10">No documents uploaded</p>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {documents.map(doc => {
-                const isPdf = doc.mimeType === 'application/pdf' || doc.url?.toLowerCase().endsWith('.pdf');
-                const isImage = doc.mimeType?.startsWith('image/');
-                return (
-                  <div key={doc._id} className="bg-gray-50 border rounded-xl p-3 flex flex-col hover:shadow-md transition-shadow group">
-                    {/* Thumbnail / Icon */}
-                    <div className="w-full aspect-square rounded-lg bg-white border flex items-center justify-center overflow-hidden mb-2 cursor-pointer relative"
-                      onClick={() => setPreviewDoc(doc)}>
-                      {isImage ? (
-                        <img src={doc.url} alt={doc.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="flex flex-col items-center justify-center">
-                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${isPdf ? 'bg-red-100' : 'bg-primary-100'}`}>
-                            <FiFile className={isPdf ? 'text-red-500' : 'text-primary-600'} size={24} />
-                          </div>
-                          <span className="text-[10px] text-gray-400 mt-1 uppercase font-medium">
-                            {isPdf ? 'PDF' : doc.mimeType?.split('/').pop()?.toUpperCase() || 'FILE'}
-                          </span>
-                        </div>
-                      )}
-                      {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                        <FiEye className="text-white" size={22} />
-                      </div>
-                    </div>
-                    {/* Doc Info */}
-                    <p className="text-xs font-semibold text-gray-800 truncate" title={doc.name}>{doc.name}</p>
-                    <span className="inline-block text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded mt-1 w-fit">{doc.type}</span>
-                    {doc.description && (
-                      <p className="text-[10px] text-gray-400 mt-0.5 line-clamp-2" title={doc.description}>{doc.description}</p>
-                    )}
-                    <p className="text-[10px] text-gray-400 mt-auto pt-1">
-                      {new Date(doc.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                      {doc.uploadedBy?.name && <span> &middot; {doc.uploadedBy.name}</span>}
-                    </p>
-                    {/* Actions */}
-                    <div className="flex items-center gap-1 mt-2 pt-2 border-t">
-                      <button onClick={() => setPreviewDoc(doc)}
-                        className="flex-1 flex items-center justify-center gap-1 text-[10px] text-emerald-600 hover:bg-emerald-50 rounded py-1 font-medium">
-                        <FiEye size={12} /> View
-                      </button>
-                      <a href={downloadDocumentURL(doc._id)} target="_blank" rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-1 text-[10px] text-blue-600 hover:bg-blue-50 rounded py-1 font-medium">
-                        <FiDownload size={12} /> Download
-                      </a>
-                      {(isOwner || isHR) && (
-                        <button onClick={() => handleDeleteDoc(doc._id)}
-                          className="flex-1 flex items-center justify-center gap-1 text-[10px] text-red-600 hover:bg-red-50 rounded py-1 font-medium">
-                          <FiTrash2 size={12} /> Delete
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Document Upload Modal */}
-      {showDocModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-5 border-b">
-              <h3 className="text-lg font-semibold text-gray-800">Upload Document</h3>
-              <button onClick={() => { setShowDocModal(false); setDocForm({ name: '', type: 'Other', description: '', file: null }); }}
-                className="text-gray-400 hover:text-gray-600">
-                <FiX size={20} />
-              </button>
-            </div>
-            <form onSubmit={handleDocUpload} className="p-5 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Document Type *</label>
-                <select value={docForm.type} onChange={e => setDocForm(p => ({ ...p, type: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" required>
-                  {['ID Proof', 'Address Proof', 'Resume', 'Certificate', 'Offer Letter', 'Contract', 'Payslip', 'Experience Letter', 'Educational Document', 'PAN Card', 'Aadhaar Card', 'Passport', 'Bank Statement', 'Other'].map(t =>
-                    <option key={t} value={t}>{t}</option>
-                  )}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Document Name</label>
-                <input type="text" value={docForm.name} onChange={e => setDocForm(p => ({ ...p, name: e.target.value }))}
-                  placeholder="e.g. John's Aadhaar Card (auto-filled from filename if empty)"
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea value={docForm.description} onChange={e => setDocForm(p => ({ ...p, description: e.target.value }))}
-                  rows="2" placeholder="Short description about this document..."
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Select File *</label>
-                <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                  {docForm.file ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <FiFile className="text-primary-600" />
-                      <span className="text-sm text-gray-700">{docForm.file.name}</span>
-                      <button type="button" onClick={() => setDocForm(p => ({ ...p, file: null }))}
-                        className="text-red-500 hover:text-red-700 ml-1"><FiX size={14} /></button>
-                    </div>
-                  ) : (
-                    <label className="cursor-pointer">
-                      <FiUpload className="mx-auto text-gray-400 mb-1" size={24} />
-                      <p className="text-sm text-gray-500">Click to select a file</p>
-                      <p className="text-xs text-gray-400 mt-1">PDF, Images, Documents (Max 10MB)</p>
-                      <input type="file" className="hidden" onChange={e => {
-                        const file = e.target.files[0];
-                        if (file) setDocForm(p => ({ ...p, file, name: p.name || file.name }));
-                      }} />
-                    </label>
-                  )}
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500"><strong>Upload Date:</strong> {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} (set automatically)</p>
-              </div>
-              <div className="flex gap-3 justify-end pt-2">
-                <button type="button" onClick={() => { setShowDocModal(false); setDocForm({ name: '', type: 'Other', description: '', file: null }); }}
-                  className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={docUploading || !docForm.file}
-                  className="flex items-center gap-2 bg-primary-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-primary-700 disabled:opacity-50">
-                  <FiUpload /> {docUploading ? 'Uploading...' : 'Upload'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      {/* Document Preview Modal */}
-      {previewDoc && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b">
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-800 truncate">{previewDoc.name}</h3>
-                <div className="flex flex-wrap items-center gap-2 mt-0.5">
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{previewDoc.type}</span>
-                  <span className="text-xs text-gray-400">
-                    {new Date(previewDoc.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                  </span>
-                  {previewDoc.uploadedBy?.name && (
-                    <span className="text-xs text-gray-400">by {previewDoc.uploadedBy.name}</span>
-                  )}
-                  {previewDoc.fileSize && (
-                    <span className="text-xs text-gray-400">{(previewDoc.fileSize / 1024).toFixed(0)} KB</span>
-                  )}
-                </div>
-                {previewDoc.description && (
-                  <p className="text-xs text-gray-500 mt-1">{previewDoc.description}</p>
-                )}
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                <a href={downloadDocumentURL(previewDoc._id)} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 px-3 py-1.5 rounded-lg hover:bg-blue-50">
-                  <FiDownload size={14} /> Download
-                </a>
-                <button onClick={() => setPreviewDoc(null)}
-                  className="text-gray-400 hover:text-gray-600 p-1">
-                  <FiX size={20} />
-                </button>
-              </div>
-            </div>
-            <div className="flex-1 overflow-auto p-4 bg-gray-100 flex items-center justify-center min-h-[400px]">
-              {previewDoc.mimeType?.startsWith('image/') ? (
-                <img src={viewDocumentURL(previewDoc._id)} alt={previewDoc.name}
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow" />
-              ) : previewDoc.mimeType === 'application/pdf' || previewDoc.url?.toLowerCase().endsWith('.pdf') ? (
-                <iframe
-                  src={viewDocumentURL(previewDoc._id)}
-                  title={previewDoc.name}
-                  className="w-full h-[70vh] rounded-lg border bg-white" />
-              ) : (
-                <div className="text-center py-16">
-                  <FiFile className="mx-auto text-gray-300 mb-4" size={64} />
-                  <p className="text-gray-500 mb-2">Preview not available for this file type</p>
-                  <p className="text-xs text-gray-400 mb-4">{previewDoc.mimeType || 'Unknown type'}</p>
-                  <a href={downloadDocumentURL(previewDoc._id)} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-primary-700">
-                    <FiDownload size={14} /> Download to view
-                  </a>
-                </div>
-              )}
             </div>
           </div>
         </div>

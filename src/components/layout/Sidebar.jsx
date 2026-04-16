@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   FiHome, FiUsers, FiCalendar, FiDollarSign, FiClock,
-  FiGrid, FiBell, FiStar, FiFileText, FiX, FiShield,
+  FiGrid, FiBell, FiStar, FiFileText, FiX,
   FiChevronsLeft, FiChevronsRight, FiBriefcase, FiMessageSquare, FiAward
 } from 'react-icons/fi';
 
@@ -18,7 +18,7 @@ const Sidebar = ({ onClose, collapsed, onToggleCollapse }) => {
     { to: '/leaves', icon: FiCalendar, label: 'Leaves', roles: ['super_admin', 'hr', 'manager', 'employee'] },
     { to: '/leaves/approvals', icon: FiCalendar, label: 'Leave Approvals', roles: ['hr', 'manager'] },
     { to: '/leave-types', icon: FiCalendar, label: 'Leave Types', roles: ['super_admin', 'hr'] },
-    { to: '/leave-balances', icon: FiCalendar, label: 'Leave Balances', roles: ['hr'] },
+    { to: '/leave-balances', icon: FiCalendar, label: 'Leave Balances', roles: ['super_admin'] },
     { to: '/payroll', icon: FiDollarSign, label: 'Payroll', roles: ['super_admin', 'hr'] },
     { to: '/payroll/config', icon: FiDollarSign, label: 'Payroll Config', roles: ['super_admin', 'hr'] },
     { to: '/my-payslips', icon: FiDollarSign, label: 'My Payslips', roles: ['employee', 'manager'] },
@@ -42,9 +42,9 @@ const Sidebar = ({ onClose, collapsed, onToggleCollapse }) => {
       <div className="flex items-center justify-between p-4 border-b min-h-[3.75rem]">
         <div className="flex items-center gap-2 overflow-hidden">
           <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <FiShield className="text-white text-lg" />
+            <FiBriefcase className="text-white text-lg" />
           </div>
-          {!collapsed && <span className="text-xl font-bold text-gray-800 whitespace-nowrap">HRMS</span>}
+          {!collapsed && <span className="text-xl font-bold text-gray-800 whitespace-nowrap">InfeNevo Cloud</span>}
         </div>
         <button onClick={onClose} className="lg:hidden text-gray-500 hover:text-gray-700">
           <FiX size={20} />

@@ -1,6 +1,6 @@
-# HRMS — Human Resource Management System
+# InfeNevo Cloud — Human Resource Management System
 
-A full-stack HRMS web application built with **React + Vite** (frontend) and **Node.js + Express** (backend), using **MongoDB** for data storage and **Cloudinary** for file uploads.
+A full-stack HR management web application built with **React + Vite** (frontend) and **Node.js + Express** (backend), using **MongoDB** for data storage and **Cloudinary** for file uploads.
 
 ## Features
 
