@@ -97,7 +97,7 @@ const Header = ({ onMenuClick }) => {
           <FiMenu size={24} />
         </button>
         <h1 className="text-lg font-semibold text-gray-800 hidden sm:block">
-          Human Resource Management System
+          InfeNevo Cloud - HR Management
         </h1>
       </div>
 

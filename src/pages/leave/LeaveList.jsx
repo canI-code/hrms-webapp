@@ -75,7 +75,6 @@ const LeaveList = () => {
             className="border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500">
             <option value="">All Status</option>
             <option value="Pending">Pending</option>
-
             <option value="Approved">Approved</option>
             <option value="Rejected">Rejected</option>
             <option value="Cancelled">Cancelled</option>

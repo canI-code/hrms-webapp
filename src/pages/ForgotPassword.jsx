@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { forgotPasswordAPI, verifyOtpAPI, resetPasswordAPI } from '../api/axios';
 import { toast } from 'react-toastify';
-import { FiShield, FiMail, FiLock, FiEye, FiEyeOff, FiArrowLeft, FiCheck } from 'react-icons/fi';
+import { FiBriefcase, FiMail, FiLock, FiEye, FiEyeOff, FiArrowLeft, FiCheck } from 'react-icons/fi';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -135,7 +135,7 @@ const ForgotPassword = () => {
         {/* Logo */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-4">
-            <FiShield className="text-primary-600 text-3xl" />
+            <FiBriefcase className="text-primary-600 text-3xl" />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Forgot Password</h1>
           <p className="text-gray-500 mt-1 text-sm">

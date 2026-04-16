@@ -1,4 +1,4 @@
-# HRMS — Installation Guide
+# InfeNevo Cloud — Installation Guide
 
 Step-by-step instructions to clone, configure, and run this project.
 

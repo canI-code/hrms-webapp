@@ -11,7 +11,7 @@ const router = Router();
 router.get('/types', protect, getLeaveTypes);
 router.post('/types', protect, authorize('super_admin', 'hr'), createLeaveType);
 router.get('/balance', protect, getLeaveBalance);
-router.put('/balance', protect, authorize('hr'), adjustLeaveBalance);
+router.put('/balance', protect, authorize('super_admin'), adjustLeaveBalance);
 router.put('/types/:id', protect, authorize('super_admin', 'hr'), updateLeaveType);
 router.delete('/types/:id', protect, authorize('super_admin', 'hr'), deleteLeaveType);
 router.get('/', protect, getLeaves);

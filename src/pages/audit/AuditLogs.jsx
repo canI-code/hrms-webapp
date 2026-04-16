@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAuditLogsAPI } from '../../api/axios';
 import { toast } from 'react-toastify';
-import { FiShield } from 'react-icons/fi';
+import { FiBriefcase } from 'react-icons/fi';
 
 const AuditLogs = () => {
   const [logs, setLogs] = useState([]);
@@ -35,7 +35,7 @@ const AuditLogs = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2"><FiShield /> Audit Logs</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2"><FiBriefcase /> Audit Logs</h1>
 
       <div className="bg-white rounded-xl shadow-sm border p-4 mb-4 flex gap-3">
         <select value={module} onChange={e => { setModule(e.target.value); setPage(1); }}
