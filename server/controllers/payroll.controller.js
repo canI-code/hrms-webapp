@@ -248,45 +248,42 @@ export const downloadPayslipPDF = async (req, res) => {
     doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke('#cccccc');
     doc.moveDown(0.5);
 
-    // Earnings table
-    doc.fontSize(11).font('Helvetica-Bold').text('Earnings');
-    doc.moveDown(0.3);
-    doc.fontSize(9).font('Helvetica');
-    const drawRow = (label, value, y) => {
-      doc.text(label, 60, y);
-      doc.text(`₹ ${value.toLocaleString()}`, 400, y, { width: 130, align: 'right' });
+    // Earnings
+    const drawRow = (label, value, bold = false) => {
+      if (bold) doc.font('Helvetica-Bold'); else doc.font('Helvetica');
+      const rowY = doc.y;
+      doc.text(label, 60, rowY);
+      doc.text(`₹ ${Number(value || 0).toLocaleString()}`, 400, rowY, { width: 130, align: 'right' });
+      doc.moveDown(0.6);
     };
 
-    let y = doc.y;
-    drawRow('Basic Salary', payroll.basicSalary, y);
-    drawRow('HRA', payroll.hra, y + 16);
-    drawRow('Allowances', payroll.allowances, y + 32);
+    doc.fontSize(11).font('Helvetica-Bold').text('Earnings');
+    doc.moveDown(0.3);
+    doc.fontSize(9);
+    drawRow('Basic Salary', payroll.basicSalary);
+    drawRow('HRA', payroll.hra);
+    drawRow('Allowances', payroll.allowances);
     if (payroll.overtime?.amount > 0) {
-      drawRow(`Overtime (${payroll.overtime.hours?.toFixed(1)} hrs)`, payroll.overtime.amount, y + 48);
-      y += 16;
+      drawRow(`Overtime (${payroll.overtime.hours?.toFixed(1)} hrs)`, payroll.overtime.amount);
     }
-    doc.font('Helvetica-Bold');
-    drawRow('Gross Salary', payroll.grossSalary, y + 52);
-    doc.moveDown(5);
+    drawRow('Gross Salary', payroll.grossSalary, true);
+    doc.moveDown(0.5);
 
     doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke('#cccccc');
     doc.moveDown(0.5);
 
-    // Deductions table
+    // Deductions
     doc.fontSize(11).font('Helvetica-Bold').text('Deductions');
     doc.moveDown(0.3);
-    doc.fontSize(9).font('Helvetica');
-    y = doc.y;
-    drawRow('Provident Fund (PF)', payroll.deductions.pf, y);
-    drawRow('ESI', payroll.deductions.esi, y + 16);
-    drawRow('Professional Tax', payroll.deductions.tax, y + 32);
+    doc.fontSize(9);
+    drawRow('Provident Fund (PF)', payroll.deductions.pf);
+    drawRow('ESI', payroll.deductions.esi);
+    drawRow('Professional Tax', payroll.deductions.tax);
     if (payroll.deductions.other > 0) {
-      drawRow('Other Deductions', payroll.deductions.other, y + 48);
-      y += 16;
+      drawRow('Other Deductions', payroll.deductions.other);
     }
-    doc.font('Helvetica-Bold');
-    drawRow('Total Deductions', payroll.totalDeductions, y + 52);
-    doc.moveDown(5);
+    drawRow('Total Deductions', payroll.totalDeductions, true);
+    doc.moveDown(0.5);
 
     doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke('#cccccc');
     doc.moveDown(0.8);

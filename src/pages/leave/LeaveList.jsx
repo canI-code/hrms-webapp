@@ -25,7 +25,7 @@ const LeaveList = () => {
     setLoading(true);
     try {
       const res = await getLeavesAPI({ status: statusFilter, limit: 50 });
-      setLeaves(res.data.leaves);
+      setLeaves(res.data.leaves.filter(l => l.employee?.firstName));
     } catch { toast.error('Failed to load leaves'); }
     finally { setLoading(false); }
   };
@@ -69,7 +69,7 @@ const LeaveList = () => {
   return (
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">{isSuperAdmin ? 'All Leaves' : 'My Leaves'}</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Leaves</h1>
         <div className="flex gap-3">
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
             className="border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500">

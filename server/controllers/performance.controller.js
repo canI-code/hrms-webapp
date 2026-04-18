@@ -34,6 +34,7 @@ export const getPerformanceReviews = async (req, res) => {
       .populate('employee', 'firstName lastName employeeId designation department')
       .populate({ path: 'employee', populate: { path: 'department', select: 'name' } })
       .populate('reviewer', 'firstName lastName employeeId')
+      .populate('reviewerUser', 'name')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
@@ -51,7 +52,8 @@ export const getPerformanceReview = async (req, res) => {
     const review = await Performance.findById(req.params.id)
       .populate('employee', 'firstName lastName employeeId designation department')
       .populate({ path: 'employee', populate: { path: 'department', select: 'name' } })
-      .populate('reviewer', 'firstName lastName employeeId');
+      .populate('reviewer', 'firstName lastName employeeId')
+      .populate('reviewerUser', 'name');
 
     if (!review) return res.status(404).json({ message: 'Review not found' });
 
@@ -78,9 +80,13 @@ export const createPerformanceReview = async (req, res) => {
     const employee = await Employee.findById(employeeId);
     if (!employee) return res.status(404).json({ message: 'Employee not found' });
 
-    // The reviewer is the currently logged-in manager/HR
+    // The reviewer is the currently logged-in user.
+    // super_admin / admin may not have an Employee profile — that's fine.
+    const isSuperAdmin = ['super_admin', 'admin'].includes(req.user.role);
     const reviewerEmp = await Employee.findOne({ user: req.user._id });
-    if (!reviewerEmp) return res.status(404).json({ message: 'Reviewer profile not found' });
+    if (!reviewerEmp && !isSuperAdmin) {
+      return res.status(404).json({ message: 'Reviewer profile not found' });
+    }
 
     // Check if review already exists for this employee/period/year
     const existing = await Performance.findOne({ employee: employeeId, period, year });
@@ -90,7 +96,7 @@ export const createPerformanceReview = async (req, res) => {
 
     const review = await Performance.create({
       employee: employeeId,
-      reviewer: reviewerEmp._id,
+      reviewer: reviewerEmp?._id ?? null,
       reviewerUser: req.user._id,
       period,
       year,
@@ -277,7 +283,7 @@ export const deletePerformanceReview = async (req, res) => {
     const review = await Performance.findById(req.params.id);
     if (!review) return res.status(404).json({ message: 'Review not found' });
 
-    if (review.status !== 'Draft') {
+    if (review.status !== 'Draft' && req.user.role !== 'super_admin') {
       return res.status(400).json({ message: 'Only draft reviews can be deleted' });
     }
 

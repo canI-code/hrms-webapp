@@ -11,7 +11,7 @@ const kpiSchema = new mongoose.Schema({
 
 const performanceSchema = new mongoose.Schema({
   employee: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee', required: true },
-  reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee', required: true },
+  reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
   reviewerUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   period: {
     type: String,

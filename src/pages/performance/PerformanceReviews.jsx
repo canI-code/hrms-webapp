@@ -293,18 +293,22 @@ const PerformanceReviews = () => {
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor(r.status)}`}>{r.status}</span>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{r.reviewer?.firstName} {r.reviewer?.lastName}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {r.reviewer
+                        ? `${r.reviewer.firstName} ${r.reviewer.lastName}`
+                        : r.reviewerUser?.name || '—'}
+                    </td>
                     <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
                       <div className="flex justify-end gap-1">
                         {r.status === 'Draft' && canCreate && (
-                          <>
-                            <button onClick={() => openEdit(r)} className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit">
-                              <FiEdit2 size={14} />
-                            </button>
-                            <button onClick={() => handleDelete(r._id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded" title="Delete">
-                              <FiTrash2 size={14} />
-                            </button>
-                          </>
+                          <button onClick={() => openEdit(r)} className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit">
+                            <FiEdit2 size={14} />
+                          </button>
+                        )}
+                        {(r.status === 'Draft' || role === 'super_admin') && (
+                          <button onClick={() => handleDelete(r._id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded" title="Delete">
+                            <FiTrash2 size={14} />
+                          </button>
                         )}
                       </div>
                     </td>
